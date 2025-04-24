@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db:
+    build: 
+      dockerfile: Dockerfile_db
+    networks:
+      - communication-network
+    command: ["uvicorn", "db:db_service", "--host", "0.0.0.0"]
+
+  client:
+    environment:
+      - APP_TOKEN=secret123
+      - BUSINESS_CONNECTION_URL=http://business:8000
+      - DB_CONNECTION_URL=http://db:8000
+    build:
+      dockerfile: Dockerfile_client
+    ports:
+      - "8000:8000"
+    networks:
+      - communication-network
+    command: ["uvicorn", "client:client", "--host", "0.0.0.0"]
+
+  business:
+    environment:
+      - BUSINESS_TOKEN=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
+      - DB_CONNECTION_URL=http://db:8000
+    build: 
+      dockerfile: Dockerfile_business
+    networks:
+      - communication-network
+    command: ["uvicorn", "business:business_service", "--host", "0.0.0.0"]
+
+networks:
+  communication-network:
